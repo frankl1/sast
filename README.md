@@ -12,6 +12,18 @@ SASTEN-A is an ensemble of $3$ approximated SAST models. The approximation is do
 
 
 
+### Results
+
+- [All models results](./results/models_acc.csv)
+- [SAST](./results/results-rf-ridge.csv)
+- [Approximated SAST: SAST-A](./results/results-sast-approx.csv)
+- [Ensemble of approximated SAST: SASTEN-A](./results/results-sast-ensemble-approx.csv)
+- [Ensemble of SAST: SASTEN](./results/results-sast-ensemble-full.csv)
+- [Execution time regarding the number of series](./results/results-scalability-number-of-series.csv)
+- [Execution time regarding series length](./results/results-scalability-series-length.csv)
+
+
+
 ### Accuracy plots
 
 |                                           |                                             |
