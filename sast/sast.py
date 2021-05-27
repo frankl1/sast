@@ -13,8 +13,14 @@ from sklearn.utils.multiclass import unique_labels
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.linear_model import RidgeClassifierCV
 from sklearn.linear_model._base import LinearClassifierMixin
+from sklearn.pipeline import Pipeline
+
+from sktime.utils.data_processing import from_2d_array_to_nested
+from sktime.transformations.panel.rocket import Rocket
 
 from numba import njit, prange
+
+from .mass2 import *
 
 @njit(fastmath=True)
 def znormalize_array(arr):
@@ -30,12 +36,17 @@ def znormalize_array(arr):
 def apply_kernel(ts, arr):
     d_best = np.inf # sdist
     m = ts.shape[0]
-    kernel = arr[~np.isnan(arr)] # ignore nanb
+    kernel = arr[~np.isnan(arr)] # ignore nan
+
+    # profile = mass2(ts, kernel)
+    # d_best = np.min(profile)
+    
     l = kernel.shape[0]
     for i in range(m - l + 1):
         d = np.sum((znormalize_array(ts[i:i+l]) - kernel)**2)
         if d < d_best:
             d_best = d
+
     return d_best
 
 @njit(parallel = True, fastmath=True)  
@@ -191,6 +202,26 @@ class SASTEnsemble(BaseEstimator, ClassifierMixin):
 
     def predict_proba(self, X):
         return self.saste.predict_proba(X)
+
+class RocketClassifier:
+    def __init__(self, num_kernels=10000, normalise=True, random_state=None, clf=None, lr_clf=True):
+        rocket = Rocket(num_kernels=num_kernels, normalise=normalise, random_state=random_state)
+        clf = RidgeClassifierCV(alphas = np.logspace(-3, 3, 10)) if clf is None else clf
+        self.model = Pipeline(steps=[('rocket', rocket), ('clf', clf)])
+        self.lr_clf = lr_clf # False if the classifier has the method predict_proba, otherwise False
+        
+    def fit(self, X, y):
+        self.model.fit(from_2d_array_to_nested(X), y)
+        
+    def predict(self, X):
+        return self.model.predict(from_2d_array_to_nested(X))
+    
+    def predict_proba(self, X):
+        X_df = from_2d_array_to_nested(X)
+        if not self.lr_clf:
+            return self.model.predict_proba(X_df)
+        X_transformed = self.model['rocket'].transform(X_df)
+        return self.model['clf']._predict_proba_lr(X_transformed)
 
 if __name__ == "__main__":
     a = np.arange(10, dtype=np.float32).reshape((2, 5))

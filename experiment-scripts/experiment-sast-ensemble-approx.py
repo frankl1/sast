@@ -2,8 +2,9 @@ import time
 import os 
 import gc
 import numpy as np
-from utils import *
-from sast import *
+
+from sast.utils import *
+from sast.sast import *
 from sklearn.linear_model import RidgeClassifierCV
 
 dataset_folder = '/home/etud/mbouopda/Univariate_arff' # the folder containing the datasets
@@ -12,7 +13,7 @@ nb_run_per_dataset = 5 # number of run for each dataset
 
 columns = ('classifier','dataset', 'acc_mean', 'acc_std', 'train_time_in_sec_mean', 'train_time_in_sec_std', 'test_time_in_sec_mean', 'test_time_in_sec_std') # columns of the output file
 
-dataset_names_file = "dataset_names_small.txt" # file containing the names of the datasets to run experiments on
+dataset_names_file = "dataset_names.txt" # file containing the names of the datasets to run experiments on
 
 min_shp_length = 3 # min candidate length
 
@@ -20,18 +21,20 @@ nb_inst_per_class = 1 # the number of instances to use per class in order to gen
 
 datasets = np.loadtxt(dataset_names_file, dtype=str) # every dataset names
 
-to_skip = np.loadtxt('skip-sast-ensemble.txt', dtype=str) # model-data to skip 
+output_file = 'results/results-sast-ensemble-approx2.csv' # the name of the result file
 
-output_file = 'results-sast-ensemble.csv' # the name of the result file
-
-combination_list = [list(range(3, 10)), list(range(10, 17)), list(range(17, 24))]
+combination_list = [list(range(3, 16, 2)), list(range(16, 27, 2)), list(range(27, 38, 2))]
 
 print('Running on', len(datasets), ' datasets')
 print('Number of run per dataset:', nb_run_per_dataset)
 
+to_skip = []
+
 mode = 'w+'
 if os.path.isfile(output_file):
 	mode = 'a+'
+	to_skip = np.loadtxt(output_file, usecols=(0,1), dtype=str, delimiter=',', skiprows=1)
+	to_skip = [''.join(elt) for elt in to_skip]
 
 with open(output_file, mode, buffering=1) as f:
 

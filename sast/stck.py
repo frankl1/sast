@@ -1,4 +1,7 @@
-# code inspired from sktime ShapeletTransform 
+# Acknowlegements:
+# ---------------
+# This file extends classes from https://github.com/alan-turing-institute/sktime/blob/v0.5.3/sktime/transformations/panel/shapelets.py
+# in order to create ShapeletTransformK
 
 from sklearn.utils import check_random_state
 from sklearn.utils.multiclass import class_distribution
@@ -10,30 +13,57 @@ import warnings
 import numpy as np
 from itertools import zip_longest
 from operator import itemgetter
-from sktime.utils.validation.series_as_features import check_X
-from sktime.utils.data_container import detabularise, concat_nested_arrays
-from sktime.transformers.series_as_features.base import BaseSeriesAsFeaturesTransformer
-from sktime.transformers.series_as_features.shapelets import *
+from sktime.utils.validation.panel import check_X
+from sktime.transformations.panel.shapelets import *
 
-class OShapeletTransform(ShapeletTransform):
+class ShapeletTransformK(ContractedShapeletTransform):
     def __init__(self,
                  min_shapelet_length=3,
                  max_shapelet_length=np.inf,
                  max_shapelets_to_store_per_class=200,
+                 num_candidates_to_sample_per_case=20,
                  random_state=None,
                  verbose=0,
                  remove_self_similar=True,
                  nb_inst_per_class = 1,
+                 time_contract_in_mins=60,
+                 avg_per_class=False,
+                 duplicate_reference=False,
                  predefined_ig_rejection_level = 0.05):
-        super(OShapeletTransform, self).__init__(min_shapelet_length, 
-                         max_shapelet_length,
-                         max_shapelets_to_store_per_class,
-                         random_state,
-                         verbose,
-                         remove_self_similar)
-        self.nb_inst_per_class = nb_inst_per_class
-        
+        super(ShapeletTransformK, self).__init__(min_shapelet_length=min_shapelet_length, 
+                         max_shapelet_length=max_shapelet_length,
+                         max_shapelets_to_store_per_class=max_shapelets_to_store_per_class,
+                         time_contract_in_mins=time_contract_in_mins,
+                         num_candidates_to_sample_per_case=num_candidates_to_sample_per_case,
+                         random_state=random_state,
+                         verbose=verbose,
+                         remove_self_similar=remove_self_similar)
+
+        if self.time_contract_in_mins == np.inf:
+            # delete this property to use ShapeletTransformK instead of the contracted version
+            del self.time_contract_in_mins 
+            del self.num_candidates_to_sample_per_case
+
         self.predefined_ig_rejection_level = predefined_ig_rejection_level
+
+        self.avg_per_class = avg_per_class
+
+        self.duplicate_reference = duplicate_reference
+
+        self.nb_inst_per_class = nb_inst_per_class
+
+        if isinstance(self.nb_inst_per_class, float):
+            assert self.nb_inst_per_class > 0 and self.nb_inst_per_class <= 1, "If float, nb_inst_per_class should be in ]0, 1]"
+
+        assert not (self.duplicate_reference and self.avg_per_class), "duplicate_reference and avg_per_class can be true at the same time"
+
+        if self.avg_per_class:
+            print('Since avg_per_class is True, nb_inst_per_class will not be used')
+            self.nb_inst_per_class = 1
+
+        if self.duplicate_reference and self.nb_inst_per_class != 1:
+            print('Since duplicate_reference is True, nb_inst_per_class will be set to 1')
+            self.nb_inst_per_class = 1
         
     def fit(self, X, y):
         """A method to fit the shapelet transform to a specified X and y
@@ -51,8 +81,8 @@ class OShapeletTransform(ShapeletTransform):
         X = check_X(X, enforce_univariate=True)
 
         if type(
-                self) is ContractedShapeletTransform and \
-                self.time_contract_in_mins <= 0:
+                self) is ContractedShapeletTransform and hasattr(self, 'time_contract_in_mins') \
+                and self.time_contract_in_mins <= 0:
             raise ValueError(
                 "Error: time limit cannot be equal to or less than 0")
 
@@ -105,14 +135,25 @@ class OShapeletTransform(ShapeletTransform):
             return (a for x in zip_longest(*iterables, fillvalue=sentinel) for
                     a in x if a != sentinel)
 
-        gen_ids_by_class = {i: self.random_state.permutation(np.where(y == i)[0])[:self.nb_inst_per_class] for i in
+        gen_ids_by_class = None
+
+        if isinstance(self.nb_inst_per_class, float):
+            gen_ids_by_class = {i: self.random_state.permutation(np.where(y == i)[0])[:int(self.nb_inst_per_class * np.sum(y == i))] for i in
                              distinct_class_vals}
+        else:
+            gen_ids_by_class = {i: self.random_state.permutation(np.where(y == i)[0])[:self.nb_inst_per_class] for i in
+                             distinct_class_vals}
+
+        if self.duplicate_reference:
+            for i, v in gen_ids_by_class.items():
+                gen_ids_by_class[i] = np.full(np.sum(y==i), v)
+
         case_ids_by_class = {i: np.where(y == i)[0] for i in distinct_class_vals}
 
         # if transform is random/contract then shuffle the data initially
         # when determining which cases to visit
         if type(self) is _RandomEnumerationShapeletTransform or type(
-                self) is ContractedShapeletTransform:
+                                self) is ContractedShapeletTransform:
             for i in range(len(distinct_class_vals)):
                 self.random_state.shuffle(
                     case_ids_by_class[distinct_class_vals[i]])
@@ -161,6 +202,7 @@ class OShapeletTransform(ShapeletTransform):
 
         # for every series
         case_idx = 0
+
         while case_idx < len(gen_cases_to_visit):
 
             series_id = gen_cases_to_visit[case_idx][0]
@@ -230,8 +272,13 @@ class OShapeletTransform(ShapeletTransform):
                 candidates_to_visit = [candidate_starts_and_lens[x] for x in
                                        cand_idx]
 
-            for candidate_idx in range(num_candidates_per_case):
+            series = X[series_id].copy()
+            if self.avg_per_class:
+                series = np.mean(X[y==this_class_val], axis=0)
+                if self.verbose > 0:
+                    print('Averaging for class: ', this_class_val)
 
+            for candidate_idx in range(num_candidates_per_case):
                 # if shapelet heap for this class is not full yet, set entry
                 # criteria to be the predetermined IG threshold
                 ig_cutoff = self.predefined_ig_rejection_level
@@ -248,7 +295,7 @@ class OShapeletTransform(ShapeletTransform):
                 cand_len = candidates_to_visit[candidate_idx][1]
 
                 candidate = ShapeletTransform.zscore(
-                    X[series_id][:, cand_start_pos: cand_start_pos + cand_len])
+                    series[:, cand_start_pos: cand_start_pos + cand_len])
 
                 # now go through all other series and get a distance from
                 # the candidate to each
@@ -267,7 +314,7 @@ class OShapeletTransform(ShapeletTransform):
                     if y[i] != cases_to_visit[comparison_series_idx][1]:
                         raise ValueError("class match sanity test broken")
 
-                    if i == series_id:
+                    if self.nb_inst_per_class > 0 and i == series_id:
                         # don't evaluate candidate against own series
                         continue
 

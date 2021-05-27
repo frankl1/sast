@@ -4,7 +4,7 @@ import pandas as pd
 from operator import itemgetter
 import matplotlib.pyplot as plt
 from scipy.io.arff import loadarff
-from shapeletnet import znormalize_array 
+from .sast import znormalize_array 
 
 def load_arff_2_dataframe(fname):
     data = loadarff(fname)
