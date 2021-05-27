@@ -59,11 +59,11 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 ### SAST vs SOTA
 
-| ![scatter-sast-vs-rocket](/Users/michael/Desktop/Code/sast-github/images/scatter-sast-vs-rocket.jpg) | ![scatter-sast-ridge-vs-hive-cote](/Users/michael/Desktop/Code/sast-github/images/scatter-sast-ridge-vs-hive-cote.jpg) |
+| ![scatter-sast-vs-rocket](images/scatter-sast-vs-rocket.jpg) | ![scatter-sast-ridge-vs-hive-cote](images/scatter-sast-ridge-vs-hive-cote.jpg) |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 |                                                              |                                                              |
 
-![scatter-sast-ridge-vs-chief](/Users/michael/Desktop/Code/sast-github/images/scatter-sast-ridge-vs-chief.jpg)
+![scatter-sast-ridge-vs-chief](images/scatter-sast-ridge-vs-chief.jpg)
 
 ![win-per-dataset-type-sota](/Users/michael/Desktop/Code/sast-github/images/win-per-dataset-type-sota.png)
 
