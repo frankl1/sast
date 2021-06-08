@@ -85,7 +85,7 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 #### Percentage of wins per problem type
 
-![win-per-dataset-type-sota](/Users/michael/Desktop/Code/sast-github/images/win-per-dataset-type-sota.png)
+![win-per-dataset-type-sota](images/win-per-dataset-type-sota.png)
 
 
 
