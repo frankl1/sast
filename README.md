@@ -95,8 +95,8 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 #### Percentage of wins per problem type
 
-![win-per-dataset-type-sota](./images/win-per-dataset-type-sota.png)
 
+![win-per-dataset-type-sota](./images/win-per-dataset-type-sota.png)
 
 
 ### Scalability plots
@@ -108,10 +108,6 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 - Regarding the number of time series in the dataset
 
 ![](images/line-scalability-nb-series.jpg)
-
-### Comparison to SOTA
-
-![](images/cd-all-models.jpg)
 
 ## Usage
 
