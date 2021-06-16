@@ -20,7 +20,7 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 - [All models results](./results/all-model-acc.csv)
 - [SAST results](./results/results-rf-ridge.csv)
-- [STC-k results](./results/results-stck.csv)
+- [STC-k results](./results/results-stc-k.csv)
 - [Approximated SAST results: SAST-A](./results/results-sast-approx.csv)
 - [Ensemble of approximated SAST results: SASTEN-A](./results/results-sast-ensemble-approx.csv)
 - [Ensemble of SAST results: SASTEN](./results/results-sast-ensemble-full.csv)
