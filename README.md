@@ -20,6 +20,7 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 - [All models results](./results/all-model-acc.csv)
 - [SAST results](./results/results-rf-ridge.csv)
+- [STC-k results](./results/results-stck.csv)
 - [Approximated SAST results: SAST-A](./results/results-sast-approx.csv)
 - [Ensemble of approximated SAST results: SASTEN-A](./results/results-sast-ensemble-approx.csv)
 - [Ensemble of SAST results: SASTEN](./results/results-sast-ensemble-full.csv)
@@ -52,6 +53,17 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 ![SCT vs STC-k CDD](images/cdd-stck.png)
 
+### SAST vs STC
+
+#### Pairwise accuracy comparison
+
+| ![SAST vs STC-1](images/scatter-sast-stc1.png) | ![SAST vs STC](images/scatter-sast-stc.png) |
+| ---------------------------------------------- | ------------------------------------------- |
+
+#### Critical difference diagram
+
+![CDD sast vs stc](images/cdd-sast-stck.png)
+
 #### Percentage of wins per problem type
 
 ![win-per-dataset-type-stck](images/win-per-dataset-type-stck.png)
@@ -83,6 +95,8 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 ![scatter-sast-ridge-vs-chief](images/scatter-sast-ridge-vs-chief.jpg)
 
+![Cdd vs sota](images/cd-sota.jpg)
+
 #### Percentage of wins per problem type
 
 ![win-per-dataset-type-sota](/Users/michael/Desktop/Code/sast-github/images/win-per-dataset-type-sota.png)
@@ -99,9 +113,7 @@ STC-k is a shapelet transform classifier which generate shapelet candidates from
 
 ![](images/line-scalability-nb-series.jpg)
 
-### Comparison to SOTA
 
-![](images/cd-all-models.jpg)
 
 ## Usage
 
