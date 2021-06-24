@@ -14,7 +14,7 @@ SASTEN-A is an ensemble of 3 approximated SAST models. The approximation is done
 
 STC-k is a shapelet transform classifier which generate shapelet candidates from at most *k* reference time series per class. If *k* is a float, then *k x n_c* instances are used per class, where *n_c* is the total number of instances in class *c*.
 
-[Update version with more results](https://github.com/frankl1/sast/tree/update)
+[Updated version with more results](https://github.com/frankl1/sast/tree/update)
 
 ### Results
 
