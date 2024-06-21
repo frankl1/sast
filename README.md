@@ -1,5 +1,7 @@
 # SAST: Scalable and Accurate Subsequence Transform for Time Series Classification
 
+:rocket: [SAST](https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.transformations.collection.shapelet_based.SAST.html#aeon.transformations.collection.shapelet_based.SAST) and [SASTClassifier](https://www.aeon-toolkit.org/en/stable/api_reference/auto_generated/aeon.classification.shapelet_based.SASTClassifier.html#aeon.classification.shapelet_based.SASTClassifier) now available in [Aeon-toolkit](https://www.aeon-toolkit.org/en/stable/). 
+
 SAST is a novel shapelet-based time series classification method inspired by the *core object recognition* capability of human brain. SAST is more accurate than STC while being more scalable.
 
 
